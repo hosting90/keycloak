@@ -59,6 +59,7 @@ public class UserAttributeLDAPStorageMapper extends AbstractLDAPStorageMapper {
     public static final String ALWAYS_READ_VALUE_FROM_LDAP = "always.read.value.from.ldap";
     public static final String IS_MANDATORY_IN_LDAP = "is.mandatory.in.ldap";
     public static final String IS_BINARY_ATTRIBUTE = "is.binary.attribute";
+    public static final String ATTRIBUTE_DEFAULT_VALUE = "attribute.default.value";
 
     public UserAttributeLDAPStorageMapper(ComponentModel mapperModel, LDAPStorageProvider ldapProvider) {
         super(mapperModel, ldapProvider);
@@ -101,6 +102,7 @@ public class UserAttributeLDAPStorageMapper extends AbstractLDAPStorageMapper {
         String userModelAttrName = getUserModelAttribute();
         String ldapAttrName = getLdapAttributeName();
         boolean isMandatoryInLdap = parseBooleanParameter(mapperModel, IS_MANDATORY_IN_LDAP);
+        String attributeDefaultValue = getAttributeDefaultValue();
 
         Property<Object> userModelProperty = userModelProperties.get(userModelAttrName.toLowerCase());
 
@@ -111,7 +113,7 @@ public class UserAttributeLDAPStorageMapper extends AbstractLDAPStorageMapper {
 
             if (attrValue == null) {
                 if (isMandatoryInLdap) {
-                    ldapUser.setSingleAttribute(ldapAttrName, LDAPConstants.EMPTY_ATTRIBUTE_VALUE);
+                    ldapUser.setSingleAttribute(ldapAttrName, attributeDefaultValue);
                 } else {
                     ldapUser.setAttribute(ldapAttrName, new LinkedHashSet<String>());
                 }
@@ -125,7 +127,7 @@ public class UserAttributeLDAPStorageMapper extends AbstractLDAPStorageMapper {
 
             if (attrValues.size() == 0) {
                 if (isMandatoryInLdap) {
-                    ldapUser.setSingleAttribute(ldapAttrName, LDAPConstants.EMPTY_ATTRIBUTE_VALUE);
+                    ldapUser.setSingleAttribute(ldapAttrName, attributeDefaultValue);
                 } else {
                     ldapUser.setAttribute(ldapAttrName, new LinkedHashSet<String>());
                 }
@@ -419,6 +421,11 @@ public class UserAttributeLDAPStorageMapper extends AbstractLDAPStorageMapper {
                 condition.setBinary(isBinaryAttribute());
             }
         }
+    }
+
+    private String getAttributeDefaultValue() {
+        String attributeDefaultValue = mapperModel.getConfig().getFirst(ATTRIBUTE_DEFAULT_VALUE);
+        return attributeDefaultValue == null ? LDAPConstants.EMPTY_ATTRIBUTE_VALUE : attributeDefaultValue;
     }
 
     private String getUserModelAttribute() {
