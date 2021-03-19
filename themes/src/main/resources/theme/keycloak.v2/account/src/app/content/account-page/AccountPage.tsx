@@ -38,7 +38,7 @@ interface FormFields {
     readonly firstName?: string;
     readonly lastName?: string;
     readonly email?: string;
-    attributes?: { locale?: [string] };
+    attributes?: { locale?: [string], sshPublicKey?: [string] };
 }
 
 interface AccountPageState {
@@ -86,10 +86,14 @@ export class AccountPage extends React.Component<AccountPageProps, AccountPageSt
                 this.setState(this.DEFAULT_STATE);
                 const formFields = response.data;
                 if (!formFields!.attributes) {
-                    formFields!.attributes = { locale: [locale] };
-                }
-                else if (!formFields!.attributes.locale) {
-                    formFields!.attributes.locale = [locale];
+                    formFields!.attributes = { locale: [locale], sshPublicKey: [''] };
+                } else {
+                    if (!formFields!.attributes.locale) {
+                        formFields!.attributes.locale = [locale];
+                    }
+                    if (!formFields!.attributes.sshPublicKey) {
+                        formFields!.attributes.sshPublicKey = [''];
+                    }
                 }
 
                 this.setState({...{ formFields: formFields as FormFields }});
@@ -216,6 +220,24 @@ export class AccountPage extends React.Component<AccountPageProps, AccountPageSt
                         >
                         </TextInput>
                     </FormGroup>
+                            <FormGroup
+                        label="sshPublicKey"
+                        fieldId="ssh-public-key"
+                    >
+                        <TextInput
+                            type="text"
+                            id="ssh-public-key"
+                            name="sshPublicKey"
+                            value={fields.attributes!.sshPublicKey != undefined ? fields.attributes!.sshPublicKey[0] : '' }
+                            onChange={value => this.setState({
+                                    errors: this.state.errors,
+                                    formFields: { ...this.state.formFields, attributes: { ...this.state.formFields.attributes, sshPublicKey: value == '' ? undefined : [value] }}
+                                })
+                        }
+                        >
+                        </TextInput>
+                    </FormGroup>
+                    
                     {features.isInternationalizationEnabled && <FormGroup
                         label={Msg.localize('selectLocale')}
                         isRequired
